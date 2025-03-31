@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	rmqrpc "github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
+	rmqrpc "github.com/meristalis/tg-bot-notes/pkg/rabbitmq/rmq_rpc"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

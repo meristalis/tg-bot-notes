@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/ansrivas/fiberprometheus/v2"
-	"github.com/evrone/go-clean-template/config"
-	_ "github.com/evrone/go-clean-template/docs" // Swagger docs.
-	"github.com/evrone/go-clean-template/internal/controller/http/middleware"
-	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"github.com/meristalis/tg-bot-notes/config"
+	_ "github.com/meristalis/tg-bot-notes/docs" // Swagger docs.
+	"github.com/meristalis/tg-bot-notes/internal/controller/http/middleware"
+	v1 "github.com/meristalis/tg-bot-notes/internal/controller/http/v1"
+	"github.com/meristalis/tg-bot-notes/internal/usecase"
+	"github.com/meristalis/tg-bot-notes/pkg/logger"
 )
 
 // NewRouter -.
