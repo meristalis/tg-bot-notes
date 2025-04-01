@@ -9,9 +9,10 @@ import (
 
 	"github.com/meristalis/tg-bot-notes/config"
 	amqprpc "github.com/meristalis/tg-bot-notes/internal/controller/amqp_rpc"
-	v1 "github.com/meristalis/tg-bot-notes/internal/controller/http"
+	router "github.com/meristalis/tg-bot-notes/internal/controller/http"
 	"github.com/meristalis/tg-bot-notes/internal/repo/persistent"
 	"github.com/meristalis/tg-bot-notes/internal/repo/webapi"
+	"github.com/meristalis/tg-bot-notes/internal/usecase/note"
 	"github.com/meristalis/tg-bot-notes/internal/usecase/translation"
 	"github.com/meristalis/tg-bot-notes/pkg/httpserver"
 	"github.com/meristalis/tg-bot-notes/pkg/logger"
@@ -36,6 +37,10 @@ func Run(cfg *config.Config) {
 		webapi.New(),
 	)
 
+	NoteUseCase := note.New(
+		persistent.NewNoteRepo(pg),
+	)
+
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)
 
@@ -46,7 +51,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	httpServer := httpserver.New(httpserver.Port(cfg.HTTP.Port), httpserver.Prefork(cfg.HTTP.UsePreforkMode))
-	v1.NewRouter(httpServer.App, cfg, l, translationUseCase)
+	router.NewRouter(httpServer.App, cfg, l, translationUseCase, NoteUseCase)
 
 	// Start servers
 	rmqServer.Start()

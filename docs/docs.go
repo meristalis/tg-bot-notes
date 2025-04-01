@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/translation/do-translate": {
+        "/v1/translation/do-translate": {
             "post": {
                 "description": "Translate a text",
                 "consumes": [
@@ -50,19 +50,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/handler.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/handler.Response"
                         }
                     }
                 }
             }
         },
-        "/translation/history": {
+        "/v1/translation/history": {
             "get": {
                 "description": "Show all translation history",
                 "consumes": [
@@ -86,7 +86,82 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/v1.response"
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/notes": {
+            "get": {
+                "description": "Get all notes for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "Get all notes",
+                "operationId": "get-all-notes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v2.getAllNotesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new note for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "Add a new note",
+                "operationId": "add-note",
+                "parameters": [
+                    {
+                        "description": "New note",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v2.addNoteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Note"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
                         }
                     }
                 }
@@ -94,6 +169,35 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entity.Note": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "This is the content of the note."
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-04-01T12:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My First Note"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-04-01T12:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
         "entity.Translation": {
             "type": "object",
             "properties": {
@@ -112,6 +216,15 @@ const docTemplate = `{
                 "translation": {
                     "type": "string",
                     "example": "text for translation"
+                }
+            }
+        },
+        "handler.Response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "message"
                 }
             }
         },
@@ -148,12 +261,31 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.response": {
+        "v2.addNoteRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "This is the content of my note."
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My First Note"
+                }
+            }
+        },
+        "v2.getAllNotesResponse": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "message"
+                "notes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Note"
+                    }
                 }
             }
         }
@@ -164,7 +296,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Go Clean Template API",
 	Description:      "Using a translation service as an example",

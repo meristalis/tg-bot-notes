@@ -11,6 +11,7 @@ import (
 	_ "github.com/meristalis/tg-bot-notes/docs" // Swagger docs.
 	"github.com/meristalis/tg-bot-notes/internal/controller/http/middleware"
 	v1 "github.com/meristalis/tg-bot-notes/internal/controller/http/v1"
+	v2 "github.com/meristalis/tg-bot-notes/internal/controller/http/v2"
 	"github.com/meristalis/tg-bot-notes/internal/usecase"
 	"github.com/meristalis/tg-bot-notes/pkg/logger"
 )
@@ -21,8 +22,7 @@ import (
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
-// @BasePath    /v1
-func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase.Translation) {
+func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase.Translation, n usecase.Note) {
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
@@ -46,5 +46,9 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	apiV1Group := app.Group("/v1")
 	{
 		v1.NewTranslationRoutes(apiV1Group, t, l)
+	}
+	apiV2Group := app.Group("/v2")
+	{
+		v2.NewNoteRoutes(apiV2Group, n, l)
 	}
 }

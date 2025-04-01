@@ -20,4 +20,10 @@ type (
 	TranslationWebAPI interface {
 		Translate(entity.Translation) (entity.Translation, error)
 	}
+
+	// NoteRepo
+	NoteRepo interface {
+		Store(context.Context, entity.Note) error
+		GetAllNotes(context.Context) ([]entity.Note, error)
+	}
 )

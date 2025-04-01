@@ -15,4 +15,8 @@ type (
 		Translate(context.Context, entity.Translation) (entity.Translation, error)
 		History(context.Context) ([]entity.Translation, error)
 	}
+	Note interface {
+		GetAllNotes(context.Context) ([]entity.Note, error)
+		AddNote(context.Context, entity.Note) (entity.Note, error)
+	}
 )

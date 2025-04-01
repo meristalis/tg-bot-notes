@@ -7,7 +7,7 @@ import (
 )
 
 type Note struct {
-	ID        int64     `json:"id" db:"id" example:"1"`
+	ID        uuid.UUID `json:"id" db:"id" example:"550e8400-e29b-41d4-a716-446655440001"`
 	UserID    uuid.UUID `json:"user_id" db:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
 	Title     string    `json:"title" db:"title" example:"My First Note"`
 	Content   string    `json:"content" db:"content" example:"This is the content of the note."`
