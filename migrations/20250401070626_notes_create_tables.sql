@@ -7,12 +7,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     telegram_id BIGINT UNIQUE NOT NULL,
-    username TEXT,
+    username VARCHAR(255),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE notes (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     content TEXT,
@@ -28,7 +28,7 @@ CREATE TABLE tags (
 
 -- Создание таблицы для связи между заметками и тегами (многие ко многим)
 CREATE TABLE note_tags (
-    note_id INT REFERENCES notes(id) ON DELETE CASCADE,
+    note_id UUID REFERENCES notes(id) ON DELETE CASCADE,
     tag_id INT REFERENCES tags(id) ON DELETE CASCADE,
     PRIMARY KEY (note_id, tag_id)
 );
