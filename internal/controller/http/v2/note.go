@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/meristalis/tg-bot-notes/internal/entity"
 	"github.com/meristalis/tg-bot-notes/internal/usecase"
 	"github.com/meristalis/tg-bot-notes/pkg/httpserver/handler"
@@ -86,7 +87,7 @@ func (r *noteRoutes) addNote(ctx *fiber.Ctx) error {
 	note := entity.Note{
 		Title:   request.Title,
 		Content: request.Content,
-		//TODO assuming user_id is set in locals after authentication
+		UserID:  uuid.MustParse("6f604949-2e14-4a04-a0d6-17d84879514a"),
 	}
 
 	newNote, err := r.n.AddNote(ctx.UserContext(), note)

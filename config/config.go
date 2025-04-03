@@ -1,7 +1,11 @@
 package config
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"os"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -16,6 +20,7 @@ type (
 		RMQ     RMQ
 		Metrics Metrics
 		Swagger Swagger
+		Auth    Auth
 	}
 
 	// App -.
@@ -55,6 +60,11 @@ type (
 	Swagger struct {
 		Enabled bool `env:"SWAGGER_ENABLED" envDefault:"false"`
 	}
+
+	Auth struct {
+		PublicKeyFile string `env:"PUBLIC_KEY_FILE,required"`
+		PublicKey     *rsa.PublicKey
+	}
 )
 
 // NewConfig returns app config.
@@ -63,6 +73,35 @@ func NewConfig() (*Config, error) {
 	if err := env.Parse(cfg); err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
+	publicKey, err := loadPublicKey(cfg.Auth.PublicKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("parse public key error: %w", err)
+	}
+	cfg.Auth.PublicKey = publicKey
 
 	return cfg, nil
+}
+
+func loadPublicKey(path string) (*rsa.PublicKey, error) {
+	keyData, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read public key file: %w", err)
+	}
+
+	block, _ := pem.Decode(keyData)
+	if block == nil {
+		return nil, fmt.Errorf("failed to parse PEM block")
+	}
+
+	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse public key: %w", err)
+	}
+
+	rsaPublicKey, ok := publicKey.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("key is not of type rsa.PublicKey")
+	}
+
+	return rsaPublicKey, nil
 }

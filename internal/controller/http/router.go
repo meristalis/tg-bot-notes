@@ -26,6 +26,7 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
+	app.Use(middleware.JWTMiddleware(cfg.Auth.PublicKey))
 
 	// Prometheus metrics
 	if cfg.Metrics.Enabled {
