@@ -4,21 +4,17 @@ SELECT 'up SQL query';
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    telegram_id BIGINT UNIQUE NOT NULL,
-    username VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW()
-);
 
+-- Удаляем таблицу users и внешний ключ
 CREATE TABLE notes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL,
     title TEXT NOT NULL,
     content TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
 
 -- Создание таблицы для тегов
 CREATE TABLE tags (
@@ -38,10 +34,8 @@ CREATE TABLE note_tags (
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
-
-DROP TABLE IF EXISTS note_tags;
 DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS note_tags;
 DROP TABLE IF EXISTS notes;
-DROP TABLE IF EXISTS users;
 
 -- +goose StatementEnd
