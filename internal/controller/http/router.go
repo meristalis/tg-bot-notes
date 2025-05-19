@@ -10,8 +10,7 @@ import (
 	"github.com/meristalis/tg-bot-notes/config"
 	_ "github.com/meristalis/tg-bot-notes/docs" // Swagger docs.
 	"github.com/meristalis/tg-bot-notes/internal/controller/http/middleware"
-	v1 "github.com/meristalis/tg-bot-notes/internal/controller/http/v1"
-	v2 "github.com/meristalis/tg-bot-notes/internal/controller/http/v2"
+	v1 "github.com/meristalis/tg-bot-notes/internal/controller/http/v2"
 	"github.com/meristalis/tg-bot-notes/internal/usecase"
 	"github.com/meristalis/tg-bot-notes/pkg/logger"
 )
@@ -43,14 +42,10 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	app.Get("/healthz", func(ctx *fiber.Ctx) error { return ctx.SendStatus(http.StatusOK) })
 
 	// Routers
-	app.Use(middleware.JWTMiddleware(cfg.Auth.PublicKey))
+	app.Use(middleware.JWTMiddleware(cfg.Auth.PublicKey, l))
+
 	apiV1Group := app.Group("/v1")
 	{
-		v1.NewTranslationRoutes(apiV1Group, t, l)
-
-	}
-	apiV2Group := app.Group("/v2")
-	{
-		v2.NewNoteRoutes(apiV2Group, n, l)
+		v1.NewNoteRoutes(apiV1Group, n, l)
 	}
 }

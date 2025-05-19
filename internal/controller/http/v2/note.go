@@ -40,11 +40,11 @@ type getAllNotesResponse struct {
 // @Produce     json
 // @Success     200 {object} getAllNotesResponse
 // @Failure     500 {object} handler.Response
-// @Router      /v2/notes [get]
+// @Router      /v1/notes [get]
 func (r *noteRoutes) getAllNotes(ctx *fiber.Ctx) error {
 	notes, err := r.n.GetAllNotes(ctx.UserContext())
 	if err != nil {
-		r.l.Error(err, "http - v2 - getAllNotes")
+		r.l.Error(err, "http - v1 - getAllNotes")
 
 		return handler.ErrorResponse(ctx, http.StatusInternalServerError, "database problems")
 	}
@@ -67,32 +67,37 @@ type addNoteRequest struct {
 // @Success     200 {object} entity.Note
 // @Failure     400 {object} handler.Response
 // @Failure     500 {object} handler.Response
-// @Router      /v2/notes [post]
+// @Router      /v1/notes [post]
 func (r *noteRoutes) addNote(ctx *fiber.Ctx) error {
 	var request addNoteRequest
 
 	if err := ctx.BodyParser(&request); err != nil {
-		r.l.Error(err, "http - v2 - addNote")
+		r.l.Error(err, "http - v1 - addNote")
 
 		return handler.ErrorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
 
 	if err := r.v.Struct(request); err != nil {
-		r.l.Error(err, "http - v2 - addNote")
+		r.l.Error(err, "http - v1 - addNote")
 
 		return handler.ErrorResponse(ctx, http.StatusBadRequest, "invalid request body")
 	}
-
+	userIDStr := ctx.Locals("user_id").(string)
+	userUUID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		r.l.Error(err, "Cannot parse user_id")
+		return handler.ErrorResponse(ctx, http.StatusUnauthorized, "Invalid user ID")
+	}
 	// Создание новой заметки
 	note := entity.Note{
 		Title:   request.Title,
 		Content: request.Content,
-		UserID:  uuid.MustParse("6f604949-2e14-4a04-a0d6-17d84879514a"),
+		UserID:  userUUID,
 	}
 
 	newNote, err := r.n.AddNote(ctx.UserContext(), note)
 	if err != nil {
-		r.l.Error(err, "http - v2 - addNote")
+		r.l.Error(err, "http - v1 - addNote")
 
 		return handler.ErrorResponse(ctx, http.StatusInternalServerError, "failed to add note")
 	}
