@@ -1,12 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
 SELECT 'up SQL query';
--- Вставка пользователей
-INSERT INTO users (telegram_id, username)
-VALUES 
-    (123456789, 'user1'),
-    (987654321, 'user2'),
-    (555555555, 'user3');
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Вставка тегов
 INSERT INTO tags (name)
@@ -16,26 +12,59 @@ VALUES
     ('Personal'),
     ('Urgent');
 
--- Вставка заметок
-INSERT INTO notes (user_id, title, content)
-VALUES 
-    ((SELECT id FROM users WHERE telegram_id = 123456789), 'My first note', 'This is the content of the first note'),
-    ((SELECT id FROM users WHERE telegram_id = 123456789), 'Important note', 'This is a note with important information'),
-    ((SELECT id FROM users WHERE telegram_id = 987654321), 'Work tasks', 'List of tasks for work'),
-    ((SELECT id FROM users WHERE telegram_id = 555555555), 'Personal note', 'Personal thoughts and ideas');
+-- Вставка заметок с возвратом ID
+WITH 
+note1 AS (
+    INSERT INTO notes (user_id, title, content)
+    VALUES ('94f2e7c9-5e25-4dcf-9b12-1d2a837b100b', 'My first note', 'This is the content of the first note')
+    RETURNING id
+),
+note2 AS (
+    INSERT INTO notes (user_id, title, content)
+    VALUES ('94f2e7c9-5e25-4dcf-9b12-1d2a837b100b', 'Important note', 'This is a note with important information')
+    RETURNING id
+),
+note3 AS (
+    INSERT INTO notes (user_id, title, content)
+    VALUES ('94f2e7c9-5e25-4dcf-9b12-1d2a837b100b', 'Work tasks', 'List of tasks for work')
+    RETURNING id
+),
+note4 AS (
+    INSERT INTO notes (user_id, title, content)
+    VALUES ('94f2e7c9-5e25-4dcf-9b12-1d2a837b100b', 'Personal note', 'Personal thoughts and ideas')
+    RETURNING id
+)
 
 -- Связь заметок с тегами
 INSERT INTO note_tags (note_id, tag_id)
-VALUES 
-    ((SELECT id FROM notes WHERE title = 'My first note'), (SELECT id FROM tags WHERE name = 'Personal')),
-    ((SELECT id FROM notes WHERE title = 'Important note'), (SELECT id FROM tags WHERE name = 'Important')),
-    ((SELECT id FROM notes WHERE title = 'Work tasks'), (SELECT id FROM tags WHERE name = 'Work')),
-    ((SELECT id FROM notes WHERE title = 'Personal note'), (SELECT id FROM tags WHERE name = 'Personal')),
-    ((SELECT id FROM notes WHERE title = 'Work tasks'), (SELECT id FROM tags WHERE name = 'Urgent'));
+SELECT note1.id, tags.id FROM note1, tags WHERE tags.name = 'Personal'
+UNION ALL
+SELECT note2.id, tags.id FROM note2, tags WHERE tags.name = 'Important'
+UNION ALL
+SELECT note3.id, tags.id FROM note3, tags WHERE tags.name = 'Work'
+UNION ALL
+SELECT note4.id, tags.id FROM note4, tags WHERE tags.name = 'Personal'
+UNION ALL
+SELECT note3.id, tags.id FROM note3, tags WHERE tags.name = 'Urgent';
 
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+-- Удаление связей note_tags
+DELETE FROM note_tags
+WHERE note_id IN (
+    SELECT id FROM notes WHERE title IN (
+        'My first note', 'Important note', 'Work tasks', 'Personal note'
+    )
+);
+
+-- Удаление заметок
+DELETE FROM notes
+WHERE title IN ('My first note', 'Important note', 'Work tasks', 'Personal note');
+
+-- Удаление тегов
+DELETE FROM tags
+WHERE name IN ('Important', 'Work', 'Personal', 'Urgent');
+
 -- +goose StatementEnd

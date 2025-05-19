@@ -46,16 +46,17 @@ func JWTMiddleware(publicKey *rsa.PublicKey, logger logger.Interface) fiber.Hand
 		} else {
 			return fiber.NewError(fiber.StatusUnauthorized, "Invalid token expiration")
 		}
-
-		// Извлекаем user_id (обычно в поле "sub" или "user_id" — уточни у себя)
-		userID, ok := claims["sub"].(string)
+		// Извлекаем user_id
+		email, ok := claims["email"].(string)
+		if !ok || email == "" {
+			return fiber.NewError(fiber.StatusUnauthorized, "email not found in token")
+		}
+		// Извлекаем user_id
+		userID, ok := claims["uid"].(string)
 		if !ok || userID == "" {
 			return fiber.NewError(fiber.StatusUnauthorized, "User ID not found in token")
 		}
-
-		// Записываем user_id в контекст Fiber для последующего использования в обработчиках
 		c.Locals("user_id", userID)
-
 		return c.Next()
 	}
 }
