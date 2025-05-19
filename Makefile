@@ -82,13 +82,17 @@ mock: ### run mockgen
 	mockgen -source ./internal/usecase/contracts.go -package usecase_test > ./internal/usecase/mocks_usecase_test.go
 .PHONY: mock
 
-migrate-create:  ### create new migration
-	migrate create -ext sql -dir migrations '$(word 2,$(MAKECMDGOALS))'
+migrate-create: ### create new migration
+	goose create '$(word 2,$(MAKECMDGOALS))' sql -dir migrations
 .PHONY: migrate-create
 
 migrate-up: ### migration up
-	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
+	goose -dir migrations postgres '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
+
+migrate-down: ### migration down
+	goose -dir migrations postgres '$(PG_URL)?sslmode=disable' down
+.PHONY: migrate-down
 
 bin-deps: ### install tools
 	GOBIN=$(LOCAL_BIN) go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest

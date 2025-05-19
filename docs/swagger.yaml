@@ -1,5 +1,25 @@
-basePath: /v1
 definitions:
+  entity.Note:
+    properties:
+      content:
+        example: This is the content of the note.
+        type: string
+      created_at:
+        example: "2025-04-01T12:00:00Z"
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      title:
+        example: My First Note
+        type: string
+      updated_at:
+        example: "2025-04-01T12:00:00Z"
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
   entity.Translation:
     properties:
       destination:
@@ -13,6 +33,12 @@ definitions:
         type: string
       translation:
         example: text for translation
+        type: string
+    type: object
+  handler.Response:
+    properties:
+      error:
+        example: message
         type: string
     type: object
   v1.doTranslateRequest:
@@ -38,11 +64,24 @@ definitions:
           $ref: '#/definitions/entity.Translation'
         type: array
     type: object
-  v1.response:
+  v2.addNoteRequest:
     properties:
-      error:
-        example: message
+      content:
+        example: This is the content of my note.
         type: string
+      title:
+        example: My First Note
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  v2.getAllNotesResponse:
+    properties:
+      notes:
+        items:
+          $ref: '#/definitions/entity.Note'
+        type: array
     type: object
 host: localhost:8080
 info:
@@ -51,7 +90,7 @@ info:
   title: Go Clean Template API
   version: "1.0"
 paths:
-  /translation/do-translate:
+  /v1/translation/do-translate:
     post:
       consumes:
       - application/json
@@ -74,15 +113,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/handler.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/handler.Response'
       summary: Translate
       tags:
       - translation
-  /translation/history:
+  /v1/translation/history:
     get:
       consumes:
       - application/json
@@ -98,8 +137,58 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/v1.response'
+            $ref: '#/definitions/handler.Response'
       summary: Show history
       tags:
       - translation
+  /v2/notes:
+    get:
+      consumes:
+      - application/json
+      description: Get all notes for the user
+      operationId: get-all-notes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v2.getAllNotesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Get all notes
+      tags:
+      - notes
+    post:
+      consumes:
+      - application/json
+      description: Add a new note for the user
+      operationId: add-note
+      parameters:
+      - description: New note
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v2.addNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Note'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: Add a new note
+      tags:
+      - notes
 swagger: "2.0"

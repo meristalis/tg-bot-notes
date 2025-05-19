@@ -5,14 +5,15 @@ import (
 	"net/http"
 
 	"github.com/ansrivas/fiberprometheus/v2"
-	"github.com/evrone/go-clean-template/config"
-	_ "github.com/evrone/go-clean-template/docs" // Swagger docs.
-	"github.com/evrone/go-clean-template/internal/controller/http/middleware"
-	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"github.com/meristalis/tg-bot-notes/config"
+	_ "github.com/meristalis/tg-bot-notes/docs" // Swagger docs.
+	"github.com/meristalis/tg-bot-notes/internal/controller/http/middleware"
+	v1 "github.com/meristalis/tg-bot-notes/internal/controller/http/v1"
+	v2 "github.com/meristalis/tg-bot-notes/internal/controller/http/v2"
+	"github.com/meristalis/tg-bot-notes/internal/usecase"
+	"github.com/meristalis/tg-bot-notes/pkg/logger"
 )
 
 // NewRouter -.
@@ -21,8 +22,7 @@ import (
 // @description Using a translation service as an example
 // @version     1.0
 // @host        localhost:8080
-// @BasePath    /v1
-func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase.Translation) {
+func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase.Translation, n usecase.Note) {
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
@@ -43,8 +43,14 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	app.Get("/healthz", func(ctx *fiber.Ctx) error { return ctx.SendStatus(http.StatusOK) })
 
 	// Routers
+	app.Use(middleware.JWTMiddleware(cfg.Auth.PublicKey))
 	apiV1Group := app.Group("/v1")
 	{
 		v1.NewTranslationRoutes(apiV1Group, t, l)
+
+	}
+	apiV2Group := app.Group("/v2")
+	{
+		v2.NewNoteRoutes(apiV2Group, n, l)
 	}
 }

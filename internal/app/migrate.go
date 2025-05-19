@@ -3,15 +3,13 @@
 package app
 
 import (
-	"errors"
 	"log"
 	"os"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
-	// migrate tools
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq" // драйвер для PostgreSQL
+	"github.com/pressly/goose/v3"
 )
 
 const (
@@ -27,37 +25,29 @@ func init() {
 
 	databaseURL += "?sslmode=disable"
 
-	var (
-		attempts = _defaultAttempts
-		err      error
-		m        *migrate.Migrate
-	)
+	// Подключение к базе данных
+	var db *sqlx.DB
+	var err error
 
-	for attempts > 0 {
-		m, err = migrate.New("file://migrations", databaseURL)
+	for attempts := _defaultAttempts; attempts > 0; attempts-- {
+		db, err = sqlx.Open("postgres", databaseURL)
 		if err == nil {
 			break
 		}
 
 		log.Printf("Migrate: postgres is trying to connect, attempts left: %d", attempts)
 		time.Sleep(_defaultTimeout)
-		attempts--
 	}
 
 	if err != nil {
 		log.Fatalf("Migrate: postgres connect error: %s", err)
 	}
 
-	err = m.Up()
-	defer m.Close()
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatalf("Migrate: up error: %s", err)
+	// Инициализация Goose для выполнения миграций
+	err = goose.Up(db.DB, "./migrations") // путь к директории с SQL миграциями
+	if err != nil {
+		log.Fatalf("Migrate: error applying migrations: %s", err)
 	}
 
-	if errors.Is(err, migrate.ErrNoChange) {
-		log.Printf("Migrate: no change")
-		return
-	}
-
-	log.Printf("Migrate: up success")
+	log.Println("Migrations applied successfully")
 }

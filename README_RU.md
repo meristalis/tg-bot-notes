@@ -4,9 +4,9 @@
 
 Шаблон Чистой Архитектурой для приложений на Golang
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
-[![License](https://img.shields.io/github/license/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
-[![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/meristalis/tg-bot-notes)](https://goreportcard.com/report/github.com/meristalis/tg-bot-notes)
+[![License](https://img.shields.io/github/license/evrone/go-clean-template.svg)](https://github.com/meristalis/tg-bot-notes/blob/master/LICENSE)
+[![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/meristalis/tg-bot-notes/releases/)
 [![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
 
 ## Обзор
