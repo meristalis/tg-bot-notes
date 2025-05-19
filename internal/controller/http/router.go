@@ -26,7 +26,6 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	// Options
 	app.Use(middleware.Logger(l))
 	app.Use(middleware.Recovery(l))
-	app.Use(middleware.JWTMiddleware(cfg.Auth.PublicKey))
 
 	// Prometheus metrics
 	if cfg.Metrics.Enabled {
@@ -44,9 +43,11 @@ func NewRouter(app *fiber.App, cfg *config.Config, l logger.Interface, t usecase
 	app.Get("/healthz", func(ctx *fiber.Ctx) error { return ctx.SendStatus(http.StatusOK) })
 
 	// Routers
+	app.Use(middleware.JWTMiddleware(cfg.Auth.PublicKey))
 	apiV1Group := app.Group("/v1")
 	{
 		v1.NewTranslationRoutes(apiV1Group, t, l)
+
 	}
 	apiV2Group := app.Group("/v2")
 	{
