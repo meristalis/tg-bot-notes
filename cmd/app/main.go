@@ -15,5 +15,6 @@ func main() {
 	}
 
 	// Run
+	//some comment
 	app.Run(cfg)
 }
