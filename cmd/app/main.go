@@ -15,6 +15,6 @@ func main() {
 	}
 	//new
 	// Run
-	//some comment
+	//new stroke conflict
 	app.Run(cfg)
 }
